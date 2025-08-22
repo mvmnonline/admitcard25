@@ -36,9 +36,10 @@
         .error-message { color: var(--danger-color); margin-top: 15px; font-weight: 500; height: 20px; }
         .page-container {
             background: #fff; width: 210mm; box-shadow: 0 0 25px rgba(0,0,0,0.15); box-sizing: border-box; margin: 20px 0;
+            border: 1px solid #ddd; /* Added this border */
         }
         #admitCard {
-            padding: 15mm; box-sizing: border-box; position: relative; background-color: white; z-index: 1; border: 1px solid var(--border-color);
+            padding: 15mm; box-sizing: border-box; position: relative; background-color: white; z-index: 1;
         }
         #admitCard::before {
             content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120mm; height: 120mm;
@@ -74,7 +75,7 @@
         .admit-footer { display: flex; justify-content: space-between; padding-top: 15px; margin-top: 15px; }
         .signature { text-align: center; font-size: 15px; color: var(--text-color); font-weight: 500; border-top: 1px solid var(--text-color); padding-top: 5px; }
         .principal-signature-area { display: flex; flex-direction: column; align-items: center; }
-        .principal-sign { height: 45px; margin-bottom: -15px; }
+        .principal-sign { height: 45px; margin-bottom: 0; /* Changed from -15px */ }
         #downloadButton {
             display: none; width: 100%; max-width: 210mm; margin-top: 20px; padding: 15px; background: linear-gradient(45deg, #28a745, #218838);
             color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: 600; cursor: pointer; transition: transform 0.2s;
@@ -82,7 +83,7 @@
         #downloadButton:hover { transform: scale(1.02); }
         @media (max-width: 800px) {
             body { padding: 10px; }
-            .page-container, #admitCard { width: 100%; padding: 15px; box-shadow: none; }
+            .page-container, #admitCard { width: 100%; padding: 15px; box-shadow: none; border: 1px solid #ccc; }
             .header-text h1 { font-size: 18px; } .header-text h2 { font-size: 16px; }
             .detail-item { width: 100%; }
         }
@@ -277,7 +278,7 @@
                         .pdf-footer { position: absolute; bottom: 20mm; left: 18mm; right: 18mm; display: flex; justify-content: space-between; padding-top: 15px; }
                         .pdf-signature-area { font-size: 14px; text-align: center; width: 200px; }
                         .pdf-signature-line { border-top: 1px solid black; padding-top: 5px; }
-                        .pdf-principal-sign { display: block; height: 40px; margin-bottom: -15px; }
+                        .pdf-principal-sign { display: block; height: 40px; margin-bottom: 2px; /* Changed from -15px */ }
                         .pdf-pagebreak { page-break-before: always; }
                         .pdf-instructions { padding: 18mm; }
                         .pdf-instructions h3 { text-align: center; color: #0d47a1; }
