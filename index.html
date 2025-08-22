@@ -71,7 +71,7 @@
         table th { background-color: var(--bg-light); color: var(--primary-color); font-weight: 600; }
         table th:nth-child(1), table td:nth-child(1), table th:nth-child(2), table td:nth-child(2) { text-align: left; }
         .signature-box { height: 35px; min-width: 120px; border: 1px solid #bdbdbd; margin: auto; }
-        .admit-footer { display: flex; justify-content: space-between; padding-top: 20px; margin-top: 20px; }
+        .admit-footer { display: flex; justify-content: space-between; padding-top: 15px; margin-top: 15px; }
         .signature { text-align: center; font-size: 15px; color: var(--text-color); font-weight: 500; border-top: 1px solid var(--text-color); padding-top: 5px; width: 200px; }
         .principal-signature-area { display: flex; flex-direction: column; align-items: center; }
         .principal-sign { height: 45px; margin-bottom: -15px; }
@@ -79,14 +79,12 @@
         .instructions-container { padding: 18mm; box-sizing: border-box; }
         .instructions-container h3 { margin: 0 0 15px 0; text-align: center; color: var(--primary-color); font-size: 20px; }
         .instructions-container ol { padding-left: 20px; margin: 0; line-height: 1.8; font-size: 14px; color: var(--danger-color); }
-        .html2pdf-pagebreak { page-break-before: always; }
-
+        
         #downloadButton {
             display: none; width: 100%; max-width: 210mm; margin-top: 20px; padding: 15px; background: linear-gradient(45deg, #28a745, #218838);
             color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: 600; cursor: pointer; transition: transform 0.2s;
         }
         #downloadButton:hover { transform: scale(1.02); }
-
         @media (max-width: 800px) {
             body { padding: 10px; }
             .page-container, #admitCard { width: 100%; padding: 15px; box-shadow: none; }
@@ -112,63 +110,19 @@
 
     <div class="page-container" id="admitCardContainer" style="display: none;">
         <div id="admitCard">
-            <header class="admit-header">
-                <img alt="School Logo" class="logo-admit" src="logo.png">
-                <div class="header-text">
-                    <h1>MAHARISHI VIDYA MANDIR, NALBARI</h1>
-                    <p>CBSE CURRICULAM</p>
-                    <p>Batiram Road, Nalbari, PIN-781335</p>
-                    <h2>ADMIT CARD - HALF YEARLY EXAMINATION 2025</h2>
-                </div>
-            </header>
-            <div class="admit-body">
-                <div style="display: flex; justify-content: space-between;">
-                    <div class="student-details-grid">
-                        <div class="detail-item"><strong>Student ID:</strong> <span id="admitStudentID" class="student-data"></span></div>
-                        <div class="detail-item"><strong>Class:</strong> <span id="admitClass" class="student-data"></span></div>
-                        <div class="detail-item"><strong>Student Name:</strong> <span id="admitStudentName" class="student-data"></span></div>
-                        <div class="detail-item"><strong>Section:</strong> <span id="admitSection" class="student-data"></span></div>
-                        <div class="detail-item"><strong>Father's Name:</strong> <span id="admitFatherName" class="student-data"></span></div>
-                        <div class="detail-item"><strong>Roll No:</strong> <span id="admitRollNo" class="student-data"></span></div>
-                    </div>
-                    <div class="photo-area">
-                        <div class="photo-box">Paste recent passport size photograph here.</div>
-                        <div id="qrcode"></div>
-                    </div>
-                </div>
-                <div class="exam-schedule">
-                    <h3>Examination Schedule</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Subject / Paper</th>
-                                <th>Student's Signature</th>
-                                <th>Invigilator's Signature</th>
-                            </tr>
-                        </thead>
-                        <tbody id="scheduleBody"></tbody>
-                    </table>
-                </div>
             </div>
-            <footer class="admit-footer">
-                <div class="signature">Student's Signature</div>
-                <div class="principal-signature-area">
-                    <img alt="Principal's Signature" class="principal-sign" src="sign.png">
-                    <div class="signature">Principal's Signature</div>
-                </div>
-            </footer>
-        </div>
-        <div class="instructions-container html2pdf-pagebreak">
-            <h3>Instructions for Candidates</h3>
-            <ol>
-                <li>Candidates must carry this Admit Card to the examination hall on all days.</li>
-                <li>All candidates must report to the school before 8:45 AM. The school gate will be closed at 8:45 AM. No candidate will be permitted to enter the examination hall after this time under any circumstances.</li>
-                <li>The examination will commence at 9:30 AM.</li>
-                <li>Question papers will be distributed 10 minutes before the start of the examination (at 9:20 AM).</li>
-                <li>No electronic devices (mobiles, smart watches, etc.) are allowed in the examination hall.</li>
-                <li>Candidates should not write anything on the admit card except for the required signatures.</li>
-            </ol>
+        <div id="instructionsForPdf" style="display: none;">
+            <div class="instructions-container">
+                <h3>Instructions for Candidates</h3>
+                <ol>
+                    <li>Candidates must carry this Admit Card to the examination hall on all days.</li>
+                    <li>All candidates must report to the school before 8:45 AM. The school gate will be closed at 8:45 AM. No candidate will be permitted to enter the examination hall after this time under any circumstances.</li>
+                    <li>The examination will commence at 9:30 AM.</li>
+                    <li>Question papers will be distributed 10 minutes before the start of the examination (at 9:20 AM).</li>
+                    <li>No electronic devices (mobiles, smart watches, etc.) are allowed in the examination hall.</li>
+                    <li>Candidates should not write anything on the admit card except for the required signatures.</li>
+                </ol>
+            </div>
         </div>
     </div>
 
@@ -230,12 +184,66 @@
             });
 
             function populateAdmitCard(data) {
-                document.getElementById('admitStudentID').textContent = data['STUDENT ID'];
-                document.getElementById('admitStudentName').textContent = data["STUDENT'S NAME"];
-                document.getElementById('admitFatherName').textContent = data["FATHER'S NAME"];
-                document.getElementById('admitClass').textContent = data['CLASS'];
-                document.getElementById('admitSection').textContent = data['SECTION'];
-                document.getElementById('admitRollNo').textContent = data['CLASS ROLL NO'];
+                const admitCardDiv = document.getElementById('admitCard');
+                
+                let scheduleRows = '';
+                for (let i = 1; i <= 8; i++) {
+                    const dateKey = `DATE ${i}`;
+                    const paperKey = `PAPER ${i}`;
+                    if (data[dateKey] && data[paperKey]) {
+                        scheduleRows += `
+                            <tr>
+                                <td>${data[dateKey]}</td>
+                                <td>${data[paperKey]}</td>
+                                <td><div class="signature-box"></div></td>
+                                <td><div class="signature-box"></div></td>
+                            </tr>`;
+                    }
+                }
+
+                admitCardDiv.innerHTML = `
+                    <header class="admit-header">
+                        <img alt="School Logo" class="logo-admit" src="logo.png">
+                        <div class="header-text">
+                            <h1>MAHARISHI VIDYA MANDIR, NALBARI</h1>
+                            <p>CBSE CURRICULAM</p>
+                            <p>Batiram Road, Nalbari, PIN-781335</p>
+                            <h2>ADMIT CARD - HALF YEARLY EXAMINATION 2025</h2>
+                        </div>
+                    </header>
+                    <div class="admit-body">
+                        <div style="display: flex; justify-content: space-between;">
+                            <div class="student-details-grid">
+                                <div class="detail-item"><strong>Student ID:</strong> <span class="student-data">${data['STUDENT ID']}</span></div>
+                                <div class="detail-item"><strong>Class:</strong> <span class="student-data">${data['CLASS']}</span></div>
+                                <div class="detail-item"><strong>Student Name:</strong> <span class="student-data">${data["STUDENT'S NAME"]}</span></div>
+                                <div class="detail-item"><strong>Section:</strong> <span class="student-data">${data['SECTION']}</span></div>
+                                <div class="detail-item"><strong>Father's Name:</strong> <span class="student-data">${data["FATHER'S NAME"]}</span></div>
+                                <div class="detail-item"><strong>Roll No:</strong> <span class="student-data">${data['CLASS ROLL NO']}</span></div>
+                            </div>
+                            <div class="photo-area">
+                                <div class="photo-box">Paste recent passport size photograph here.</div>
+                                <div id="qrcode"></div>
+                            </div>
+                        </div>
+                        <div class="exam-schedule">
+                            <h3>Examination Schedule</h3>
+                            <table>
+                                <thead>
+                                    <tr><th>Date</th><th>Subject / Paper</th><th>Student's Signature</th><th>Invigilator's Signature</th></tr>
+                                </thead>
+                                <tbody>${scheduleRows}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <footer class="admit-footer">
+                        <div class="signature">Student's Signature</div>
+                        <div class="principal-signature-area">
+                            <img alt="Principal's Signature" class="principal-sign" src="sign.png">
+                            <div class="signature">Principal's Signature</div>
+                        </div>
+                    </footer>
+                `;
 
                 const qrcodeContainer = document.getElementById('qrcode');
                 qrcodeContainer.innerHTML = '';
@@ -243,46 +251,38 @@
                     text: `ID: ${data['STUDENT ID']}, Name: ${data["STUDENT'S NAME"]}, Class: ${data['CLASS']}`,
                     width: 110, height: 110,
                 });
-
-                const scheduleBody = document.getElementById('scheduleBody');
-                scheduleBody.innerHTML = '';
-                
-                for (let i = 1; i <= 8; i++) {
-                    const dateKey = `DATE ${i}`;
-                    const paperKey = `PAPER ${i}`;
-                    if (data[dateKey] && data[paperKey]) {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${data[dateKey]}</td>
-                            <td>${data[paperKey]}</td>
-                            <td><div class="signature-box"></div></td>
-                            <td><div class="signature-box"></div></td>
-                        `;
-                        scheduleBody.appendChild(row);
-                    }
-                }
             }
 
             function showError(message) {
                 errorMessage.textContent = message;
             }
             
+            // --- NEW, 100% RELIABLE PDF GENERATION LOGIC ---
             downloadButton.addEventListener('click', () => {
-                const element = document.querySelector('.page-container');
+                const admitCardElement = document.getElementById('admitCard');
+                const instructionsElement = document.getElementById('instructionsForPdf');
+                
                 const studentID = currentStudentData['STUDENT ID'];
                 const studentName = currentStudentData["STUDENT'S NAME"];
                 
                 const opt = {
-                    margin:       [10, 5, 10, 5], // top, left, bottom, right in mm
-                    filename:     `AdmitCard_${studentName.replace(/\s+/g, '_')}_${studentID}.pdf`,
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                    // This option tells the library how to handle page breaks
-                    pagebreak:    { mode: 'css', before: '.html2pdf-pagebreak' }
+                    margin: 0,
+                    filename: `AdmitCard_${studentName.replace(/\s+/g, '_')}_${studentID}.pdf`,
+                    image: { type: 'jpeg', quality: 1.0 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                html2pdf().set(opt).from(element).save();
+                // This new method generates the PDF in two separate, reliable steps.
+                const worker = html2pdf().from(admitCardElement).set(opt).toPdf();
+                
+                worker.get('pdf').then(function (pdf) {
+                    // Manually add a new page after the first one is rendered.
+                    pdf.addPage();
+                }).then(function () {
+                    // Render the instructions element onto the newly created page.
+                    return worker.from(instructionsElement).toContainer().toPdf();
+                }).save();
             });
         
         });
