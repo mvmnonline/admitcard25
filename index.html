@@ -240,7 +240,7 @@
             }
             
             // --- NEW, 100% RELIABLE PDF GENERATION LOGIC ---
-            function generatePdfHtml(data) {
+            function generatePdfHtml(data, qrCodeDataUrl) {
                 let scheduleRows = '';
                 for (let i = 1; i <= 8; i++) {
                     const dateKey = `DATE ${i}`;
@@ -259,7 +259,7 @@
                 return `
                     <!DOCTYPE html><html><head><style>
                         body { font-family: sans-serif; box-sizing: border-box; }
-                        .pdf-page { padding: 15mm; width: 210mm; height: 297mm; box-sizing: border-box; }
+                        .pdf-page { padding: 18mm; width: 210mm; height: 297mm; box-sizing: border-box; position: relative; }
                         .pdf-header { text-align: center; border-bottom: 2px solid #0d47a1; padding-bottom: 10px; }
                         .pdf-header h1 { margin: 0; color: #0d47a1; font-size: 24px; }
                         .pdf-header p { margin: 4px 0; font-size: 14px; }
@@ -268,12 +268,12 @@
                         .pdf-details-grid { display: flex; flex-wrap: wrap; width: 75%; }
                         .pdf-detail-item { width: 50%; padding: 5px 0; font-size: 14px; }
                         .pdf-photo-area { width: 25%; text-align: center; }
-                        .pdf-photo-box { width: 110px; height: 140px; border: 2px dashed #ccc; margin: 0 auto; text-align: center; font-size: 12px; padding: 5px; }
+                        .pdf-photo-box { width: 110px; height: 140px; border: 2px dashed #ccc; margin: 0 auto 10px auto; text-align: center; font-size: 12px; padding: 5px; }
                         .pdf-schedule { margin-top: 20px; }
                         .pdf-schedule table { width: 100%; border-collapse: collapse; }
                         .pdf-schedule th, .pdf-schedule td { border: 1px solid #ccc; padding: 6px; font-size: 12px; text-align: left; }
                         .pdf-schedule th { background-color: #f5f7fa; }
-                        .pdf-footer { position: absolute; bottom: 20mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; padding-top: 15px; }
+                        .pdf-footer { position: absolute; bottom: 20mm; left: 18mm; right: 18mm; display: flex; justify-content: space-between; padding-top: 15px; }
                         .pdf-signature-area { font-size: 14px; text-align: center; border-top: 1px solid black; padding-top: 5px; width: 200px; }
                         .pdf-pagebreak { page-break-before: always; }
                         .pdf-instructions { padding: 18mm; }
@@ -295,7 +295,10 @@
                                     <div class="pdf-detail-item"><b>Father's Name:</b> ${data["FATHER'S NAME"]}</div>
                                     <div class="pdf-detail-item"><b>Roll No:</b> ${data['CLASS ROLL NO']}</div>
                                 </div>
-                                <div class="pdf-photo-area"><div class="pdf-photo-box">Paste recent passport size photograph here.</div></div>
+                                <div class="pdf-photo-area">
+                                    <div class="pdf-photo-box">Paste recent passport size photograph here.</div>
+                                    <img src="${qrCodeDataUrl}" style="width: 110px; height: 110px;">
+                                </div>
                             </div>
                             <div class="pdf-schedule">
                                 <h3>Examination Schedule</h3>
@@ -322,18 +325,24 @@
             }
 
             downloadButton.addEventListener('click', () => {
-                const pdfHtml = generatePdfHtml(currentStudentData);
+                // 1. Get the QR code as an image data URL
+                const qrCodeCanvas = document.querySelector('#qrcode canvas');
+                const qrCodeDataUrl = qrCodeCanvas.toDataURL("image/png");
+                
+                // 2. Generate the clean HTML, passing the QR code image data to it
+                const pdfHtml = generatePdfHtml(currentStudentData, qrCodeDataUrl);
+                
                 const studentID = currentStudentData['STUDENT ID'];
                 const studentName = currentStudentData["STUDENT'S NAME"];
                 
                 const opt = {
                     margin: 0,
                     filename: `AdmitCard_${studentName.replace(/\s+/g, '_')}_${studentID}.pdf`,
-                    image: { type: 'jpeg', quality: 1.0 },
                     html2canvas: { scale: 2 },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
+                // 3. Generate the PDF from the clean HTML string
                 html2pdf().set(opt).from(pdfHtml).save();
             });
         });
