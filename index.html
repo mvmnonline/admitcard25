@@ -36,7 +36,7 @@
         .error-message { color: var(--danger-color); margin-top: 15px; font-weight: 500; height: 20px; }
         .page-container {
             background: #fff; width: 210mm; box-shadow: 0 0 25px rgba(0,0,0,0.15); box-sizing: border-box; margin: 20px 0;
-            border: 1px solid #ddd; /* Added this border */
+            border: 1px solid #ddd;
         }
         #admitCard {
             padding: 15mm; box-sizing: border-box; position: relative; background-color: white; z-index: 1;
@@ -75,17 +75,64 @@
         .admit-footer { display: flex; justify-content: space-between; padding-top: 15px; margin-top: 15px; }
         .signature { text-align: center; font-size: 15px; color: var(--text-color); font-weight: 500; border-top: 1px solid var(--text-color); padding-top: 5px; }
         .principal-signature-area { display: flex; flex-direction: column; align-items: center; }
-        .principal-sign { height: 45px; margin-bottom: 0; /* Changed from -15px */ }
-        #downloadButton {
-            display: none; width: 100%; max-width: 210mm; margin-top: 20px; padding: 15px; background: linear-gradient(45deg, #28a745, #218838);
-            color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: 600; cursor: pointer; transition: transform 0.2s;
+        .principal-sign { height: 45px; margin-bottom: 0; }
+        
+        /* --- NEW STYLES FOR ACTION BUTTONS --- */
+        .action-buttons {
+            display: none; /* Hidden by default, shown with JS */
+            width: 100%;
+            max-width: 210mm;
+            margin-top: 20px;
+            gap: 15px;
         }
-        #downloadButton:hover { transform: scale(1.02); }
+        #downloadButton, #printButton {
+            flex: 1;
+            padding: 15px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        #downloadButton:hover, #printButton:hover {
+            transform: scale(1.02);
+        }
+        #downloadButton {
+            background: linear-gradient(45deg, #28a745, #218838);
+        }
+        #printButton {
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+        }
+
+        /* --- MEDIA QUERIES --- */
         @media (max-width: 800px) {
             body { padding: 10px; }
             .page-container, #admitCard { width: 100%; padding: 15px; box-shadow: none; border: 1px solid #ccc; }
             .header-text h1 { font-size: 18px; } .header-text h2 { font-size: 16px; }
             .detail-item { width: 100%; }
+            .action-buttons { flex-direction: column; }
+        }
+
+        /* --- NEW PRINT-SPECIFIC STYLES --- */
+        @media print {
+            body {
+                padding: 0;
+                margin: 0;
+            }
+            .login-container, .action-buttons {
+                display: none !important; /* Hide login and action buttons when printing */
+            }
+            .page-container, #admitCard {
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            #admitCard::before {
+                opacity: 0.05; /* Make watermark lighter for printing */
+            }
         }
     </style>
 </head>
@@ -109,7 +156,10 @@
             </div>
     </div>
 
-    <button id="downloadButton">Download as PDF</button>
+    <div class="action-buttons" id="actionButtons">
+        <button id="downloadButton">Download as PDF</button>
+        <button id="printButton">Print</button>
+    </div>
     
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -125,7 +175,9 @@
             const errorMessage = document.getElementById('errorMessage');
             const loginContainer = document.getElementById('loginContainer');
             const admitCardContainer = document.getElementById('admitCardContainer');
+            const actionButtons = document.getElementById('actionButtons'); // Get the button container
             const downloadButton = document.getElementById('downloadButton');
+            const printButton = document.getElementById('printButton'); // Get the new print button
 
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -148,7 +200,7 @@
                                 populateAdmitCard(studentData);
                                 loginContainer.style.display = 'none';
                                 admitCardContainer.style.display = 'block';
-                                downloadButton.style.display = 'block';
+                                actionButtons.style.display = 'flex'; // Show the container with both buttons
                             } else {
                                 showError('Invalid credentials. Please check Student ID and Date of Birth.');
                             }
@@ -240,7 +292,6 @@
                 errorMessage.textContent = message;
             }
             
-            // --- NEW, 100% RELIABLE PDF GENERATION LOGIC ---
             function generatePdfHtml(data, logoBase64, signBase64, qrCodeDataUrl) {
                 let scheduleRows = '';
                 for (let i = 1; i <= 8; i++) {
@@ -278,7 +329,7 @@
                         .pdf-footer { position: absolute; bottom: 20mm; left: 18mm; right: 18mm; display: flex; justify-content: space-between; padding-top: 15px; }
                         .pdf-signature-area { font-size: 14px; text-align: center; width: 200px; }
                         .pdf-signature-line { border-top: 1px solid black; padding-top: 5px; }
-                        .pdf-principal-sign { display: block; height: 40px; margin-bottom: 2px; /* Changed from -15px */ }
+                        .pdf-principal-sign { display: block; height: 40px; margin-bottom: 2px; }
                         .pdf-pagebreak { page-break-before: always; }
                         .pdf-instructions { padding: 18mm; }
                         .pdf-instructions h3 { text-align: center; color: #0d47a1; }
@@ -335,7 +386,6 @@
                     </body></html>`;
             }
 
-            // Function to convert images to Base64 data for embedding in the PDF
             function toBase64(url, callback) {
                 const xhr = new XMLHttpRequest();
                 xhr.onload = function() {
@@ -373,6 +423,12 @@
                     });
                 });
             });
+
+            // --- NEW: EVENT LISTENER FOR PRINT BUTTON ---
+            printButton.addEventListener('click', () => {
+                window.print();
+            });
+
         });
     </script>
 </body>
