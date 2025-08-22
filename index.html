@@ -132,19 +132,17 @@
     </div>
 
     <div class="action-buttons" id="actionButtons">
-        <button id="downloadButton">Download as PDF</button>
+        <button id="downloadButton">Download Admit Card</button>
         <button id="printButton">Print</button>
     </div>
     
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <script>
         window.addEventListener('load', function () {
 
             const API_URL = 'https://sheetdb.io/api/v1/6vhict11rewcj';
-            let currentStudentData = {}; 
-
+            
             const form = document.getElementById('admitCardForm');
             const submitButton = document.getElementById('submitButton');
             const errorMessage = document.getElementById('errorMessage');
@@ -167,8 +165,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.length > 0 && data[0]['DATE OF BIRTH'] === dob) {
-                            currentStudentData = data[0];
-                            populateAdmitCard(currentStudentData);
+                            populateAdmitCard(data[0]);
                             loginContainer.style.display = 'none';
                             admitCardContainer.style.display = 'block';
                             actionButtons.style.display = 'flex';
@@ -260,53 +257,14 @@
 
             function showError(message) { errorMessage.textContent = message; }
             
-            function toBase64(url) {
-                return new Promise((resolve, reject) => {
-                    const xhr = new XMLHttpRequest();
-                    xhr.onload = function() {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(xhr.response);
-                    };
-                    xhr.onerror = reject;
-                    xhr.open('GET', url);
-                    xhr.responseType = 'blob';
-                    xhr.send();
-                });
-            }
-
-            downloadButton.addEventListener('click', async () => {
-                const element = document.getElementById('admitCardContent');
-                const studentID = currentStudentData['STUDENT ID'];
-                const studentName = currentStudentData["STUDENT'S NAME"];
-                
-                try {
-                    const logoBase64 = await toBase64('logo.png');
-                    const signBase64 = await toBase64('sign.png');
-                    
-                    const tempElement = element.cloneNode(true);
-                    tempElement.querySelector('.logo-admit').src = logoBase64;
-                    tempElement.querySelector('.principal-sign').src = signBase64;
-                    tempElement.querySelector('.admit-card-page').style.backgroundImage = `url(${logoBase64})`;
-                    tempElement.querySelector('.admit-card-page').style.backgroundRepeat = 'no-repeat';
-                    tempElement.querySelector('.admit-card-page').style.backgroundPosition = 'center';
-                    tempElement.querySelector('.admit-card-page').style.backgroundSize = 'contain';
-                    
-                    const opt = {
-                        margin: 0,
-                        filename: `AdmitCard_${studentName.replace(/\s+/g, '_')}_${studentID}.pdf`,
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true },
-                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                    };
-                    html2pdf().set(opt).from(tempElement).save();
-                } catch (error) {
-                    alert('Could not download PDF. An error occurred while loading images.');
-                }
+            // --- MODIFIED: Both buttons now trigger the print dialog ---
+            downloadButton.addEventListener('click', () => {
+                window.print();
             });
 
-            printButton.addEventListener('click', () => { window.print(); });
+            printButton.addEventListener('click', () => {
+                window.print();
+            });
         });
     </script>
 </body>
