@@ -71,14 +71,22 @@
         table th { background-color: var(--bg-light); color: var(--primary-color); font-weight: 600; }
         table th:nth-child(1), table td:nth-child(1), table th:nth-child(2), table td:nth-child(2) { text-align: left; }
         .signature-box { height: 35px; min-width: 120px; border: 1px solid #bdbdbd; margin: auto; }
-        .admit-footer { display: flex; justify-content: space-between; padding-top: 15px; margin-top: 15px; }
-        .signature { text-align: center; font-size: 15px; color: var(--text-color); font-weight: 500; border-top: 1px solid var(--text-color); padding-top: 5px; }
-        .principal-sign { height: 45px; margin-bottom: -25px; }
+        .admit-footer { display: flex; justify-content: space-between; padding-top: 20px; margin-top: 20px; }
+        .signature { text-align: center; font-size: 15px; color: var(--text-color); font-weight: 500; border-top: 1px solid var(--text-color); padding-top: 5px; width: 200px; }
+        .principal-signature-area { display: flex; flex-direction: column; align-items: center; }
+        .principal-sign { height: 45px; margin-bottom: -15px; }
+
+        .instructions-container { padding: 18mm; box-sizing: border-box; }
+        .instructions-container h3 { margin: 0 0 15px 0; text-align: center; color: var(--primary-color); font-size: 20px; }
+        .instructions-container ol { padding-left: 20px; margin: 0; line-height: 1.8; font-size: 14px; color: var(--danger-color); }
+        .html2pdf-pagebreak { page-break-before: always; }
+
         #downloadButton {
             display: none; width: 100%; max-width: 210mm; margin-top: 20px; padding: 15px; background: linear-gradient(45deg, #28a745, #218838);
             color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: 600; cursor: pointer; transition: transform 0.2s;
         }
         #downloadButton:hover { transform: scale(1.02); }
+
         @media (max-width: 800px) {
             body { padding: 10px; }
             .page-container, #admitCard { width: 100%; padding: 15px; box-shadow: none; }
@@ -145,11 +153,22 @@
             </div>
             <footer class="admit-footer">
                 <div class="signature">Student's Signature</div>
-                <div class="signature">
+                <div class="principal-signature-area">
                     <img alt="Principal's Signature" class="principal-sign" src="sign.png">
-                    <div>Principal's Signature</div>
+                    <div class="signature">Principal's Signature</div>
                 </div>
             </footer>
+        </div>
+        <div class="instructions-container html2pdf-pagebreak">
+            <h3>Instructions for Candidates</h3>
+            <ol>
+                <li>Candidates must carry this Admit Card to the examination hall on all days.</li>
+                <li>All candidates must report to the school before 8:45 AM. The school gate will be closed at 8:45 AM. No candidate will be permitted to enter the examination hall after this time under any circumstances.</li>
+                <li>The examination will commence at 9:30 AM.</li>
+                <li>Question papers will be distributed 10 minutes before the start of the examination (at 9:20 AM).</li>
+                <li>No electronic devices (mobiles, smart watches, etc.) are allowed in the examination hall.</li>
+                <li>Candidates should not write anything on the admit card except for the required signatures.</li>
+            </ol>
         </div>
     </div>
 
@@ -248,134 +267,22 @@
                 errorMessage.textContent = message;
             }
             
-            // --- NEW, RELIABLE PDF GENERATION LOGIC ---
-            function generatePdfHtml(data, logoBase64, signBase64) {
-                let scheduleRows = '';
-                for (let i = 1; i <= 8; i++) {
-                    const dateKey = `DATE ${i}`;
-                    const paperKey = `PAPER ${i}`;
-                    if (data[dateKey] && data[paperKey]) {
-                        scheduleRows += `
-                            <tr>
-                                <td>${data[dateKey]}</td>
-                                <td>${data[paperKey]}</td>
-                                <td style="height: 30px; border: 1px solid #ccc;"></td>
-                                <td style="height: 30px; border: 1px solid #ccc;"></td>
-                            </tr>`;
-                    }
-                }
-
-                return `
-                    <!DOCTYPE html><html><head><style>
-                        body { font-family: Poppins, sans-serif; box-sizing: border-box; color: #212121; }
-                        .pdf-page { padding: 18mm; width: 210mm; height: 297mm; box-sizing: border-box; position: relative; }
-                        .pdf-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120mm; opacity: 0.06; z-index: -1; }
-                        .pdf-header { display: flex; align-items: center; border-bottom: 2px solid #0d47a1; padding-bottom: 10px; }
-                        .pdf-logo { width: 90px; margin-right: 20px; }
-                        .pdf-header-text { text-align: center; flex-grow: 1; }
-                        .pdf-header-text h1 { margin: 0; color: #0d47a1; font-size: 24px; }
-                        .pdf-header-text p { margin: 4px 0; font-size: 14px; }
-                        .pdf-header-text h2 { margin: 10px 0 0 0; background: #1565c0; color: white; padding: 8px; font-size: 18px; }
-                        .pdf-student-info { display: flex; justify-content: space-between; margin-top: 15px; }
-                        .pdf-details-grid { display: flex; flex-wrap: wrap; width: 75%; }
-                        .pdf-detail-item { width: 50%; padding: 5px 0; font-size: 14px; }
-                        .pdf-photo-area { width: 25%; text-align: center; }
-                        .pdf-photo-box { width: 110px; height: 140px; border: 2px dashed #ccc; margin: 0 auto; text-align: center; font-size: 12px; padding: 5px; }
-                        .pdf-schedule { margin-top: 15px; }
-                        .pdf-schedule table { width: 100%; border-collapse: collapse; }
-                        .pdf-schedule th, .pdf-schedule td { border: 1px solid #ccc; padding: 6px; font-size: 12px; text-align: left; }
-                        .pdf-schedule th { background-color: #f5f7fa; }
-                        .pdf-footer { position: absolute; bottom: 18mm; left: 18mm; right: 18mm; display: flex; justify-content: space-between; padding-top: 15px; }
-                        .pdf-signature-area { font-size: 14px; text-align: center; border-top: 1px solid black; padding-top: 5px; width: 200px; }
-                        .pdf-principal-sign { display: block; height: 40px; margin: -15px auto -5px auto; }
-                        .pdf-pagebreak { page-break-before: always; }
-                        .pdf-instructions h3 { text-align: center; color: #0d47a1; }
-                        .pdf-instructions ol { line-height: 1.8; font-size: 14px; color: #c62828; }
-                    </style></head><body>
-                        <div class="pdf-page">
-                            <img src="${logoBase64}" class="pdf-watermark">
-                            <div class="pdf-header">
-                                <img src="${logoBase64}" class="pdf-logo">
-                                <div class="pdf-header-text">
-                                    <h1>MAHARISHI VIDYA MANDIR, NALBARI</h1><p>CBSE CURRICULAM</p><p>Batiram Road, Nalbari, PIN-781335</p>
-                                    <h2>ADMIT CARD - HALF YEARLY EXAMINATION 2025</h2>
-                                </div>
-                            </div>
-                            <div class="pdf-student-info">
-                                <div class="pdf-details-grid">
-                                    <div class="pdf-detail-item"><b>Student ID:</b> ${data['STUDENT ID']}</div>
-                                    <div class="pdf-detail-item"><b>Class:</b> ${data['CLASS']}</div>
-                                    <div class="pdf-detail-item"><b>Student Name:</b> ${data["STUDENT'S NAME"]}</div>
-                                    <div class="pdf-detail-item"><b>Section:</b> ${data['SECTION']}</div>
-                                    <div class="pdf-detail-item"><b>Father's Name:</b> ${data["FATHER'S NAME"]}</div>
-                                    <div class="pdf-detail-item"><b>Roll No:</b> ${data['CLASS ROLL NO']}</div>
-                                </div>
-                                <div class="pdf-photo-area"><div class="pdf-photo-box">Paste recent passport size photograph here.</div></div>
-                            </div>
-                            <div class="pdf-schedule">
-                                <h3>Examination Schedule</h3>
-                                <table><thead><tr><th>Date</th><th>Subject / Paper</th><th>Student's Signature</th><th>Invigilator's Signature</th></tr></thead>
-                                <tbody>${scheduleRows}</tbody>
-                                </table>
-                            </div>
-                            <div class="pdf-footer">
-                                <div class="pdf-signature-area">Student's Signature</div>
-                                <div class="pdf-signature-area">
-                                    <img src="${signBase64}" class="pdf-principal-sign">
-                                    Principal's Signature
-                                </div>
-                            </div>
-                        </div>
-                        <div class="pdf-instructions pdf-pagebreak">
-                            <h3>Instructions for Candidates</h3>
-                            <ol>
-                                <li>Candidates must carry this Admit Card to the examination hall on all days.</li>
-                                <li>All candidates must report to the school before 8:45 AM. The school gate will be closed at 8:45 AM. No candidate will be permitted to enter the examination hall after this time under any circumstances.</li>
-                                <li>The examination will commence at 9:30 AM.</li>
-                                <li>Question papers will be distributed 10 minutes before the start of the examination (at 9:20 AM).</li>
-                                <li>No electronic devices (mobiles, smart watches, etc.) are allowed in the examination hall.</li>
-                                <li>Candidates should not write anything on the admit card except for the required signatures.</li>
-                            </ol>
-                        </div>
-                    </body></html>`;
-            }
-
-            // Function to convert images to Base64 for embedding in the PDF
-            function toBase64(url, callback) {
-                const xhr = new XMLHttpRequest();
-                xhr.onload = function() {
-                    const reader = new FileReader();
-                    reader.onloadend = function() {
-                        callback(reader.result);
-                    }
-                    reader.readAsDataURL(xhr.response);
-                };
-                xhr.open('GET', url);
-                xhr.responseType = 'blob';
-                xhr.send();
-            }
-
             downloadButton.addEventListener('click', () => {
-                // Convert images to Base64 first
-                toBase64('logo.png', function(logoBase64) {
-                    toBase64('sign.png', function(signBase64) {
-                        // Once images are ready, generate the PDF
-                        const pdfHtml = generatePdfHtml(currentStudentData, logoBase64, signBase64);
-                        
-                        const studentID = currentStudentData['STUDENT ID'];
-                        const studentName = currentStudentData["STUDENT'S NAME"];
-                        
-                        const opt = {
-                            margin: 0,
-                            filename: `AdmitCard_${studentName.replace(/\s+/g, '_')}_${studentID}.pdf`,
-                            image: { type: 'jpeg', quality: 1.0 },
-                            html2canvas: { scale: 3, useCORS: true },
-                            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                        };
+                const element = document.querySelector('.page-container');
+                const studentID = currentStudentData['STUDENT ID'];
+                const studentName = currentStudentData["STUDENT'S NAME"];
+                
+                const opt = {
+                    margin:       [10, 5, 10, 5], // top, left, bottom, right in mm
+                    filename:     `AdmitCard_${studentName.replace(/\s+/g, '_')}_${studentID}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    // This option tells the library how to handle page breaks
+                    pagebreak:    { mode: 'css', before: '.html2pdf-pagebreak' }
+                };
 
-                        html2pdf().set(opt).from(pdfHtml).save();
-                    });
-                });
+                html2pdf().set(opt).from(element).save();
             });
         
         });
