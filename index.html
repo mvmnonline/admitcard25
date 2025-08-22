@@ -72,14 +72,9 @@
         table th:nth-child(1), table td:nth-child(1), table th:nth-child(2), table td:nth-child(2) { text-align: left; }
         .signature-box { height: 35px; min-width: 120px; border: 1px solid #bdbdbd; margin: auto; }
         .admit-footer { display: flex; justify-content: space-between; padding-top: 15px; margin-top: 15px; }
-        .signature { text-align: center; font-size: 15px; color: var(--text-color); font-weight: 500; border-top: 1px solid var(--text-color); padding-top: 5px; width: 200px; }
+        .signature { text-align: center; font-size: 15px; color: var(--text-color); font-weight: 500; border-top: 1px solid var(--text-color); padding-top: 5px; }
         .principal-signature-area { display: flex; flex-direction: column; align-items: center; }
         .principal-sign { height: 45px; margin-bottom: -15px; }
-
-        .instructions-container { padding: 18mm; box-sizing: border-box; }
-        .instructions-container h3 { margin: 0 0 15px 0; text-align: center; color: var(--primary-color); font-size: 20px; }
-        .instructions-container ol { padding-left: 20px; margin: 0; line-height: 1.8; font-size: 14px; color: var(--danger-color); }
-        
         #downloadButton {
             display: none; width: 100%; max-width: 210mm; margin-top: 20px; padding: 15px; background: linear-gradient(45deg, #28a745, #218838);
             color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: 600; cursor: pointer; transition: transform 0.2s;
@@ -111,19 +106,6 @@
     <div class="page-container" id="admitCardContainer" style="display: none;">
         <div id="admitCard">
             </div>
-        <div id="instructionsForPdf" style="display: none;">
-            <div class="instructions-container">
-                <h3>Instructions for Candidates</h3>
-                <ol>
-                    <li>Candidates must carry this Admit Card to the examination hall on all days.</li>
-                    <li>All candidates must report to the school before 8:45 AM. The school gate will be closed at 8:45 AM. No candidate will be permitted to enter the examination hall after this time under any circumstances.</li>
-                    <li>The examination will commence at 9:30 AM.</li>
-                    <li>Question papers will be distributed 10 minutes before the start of the examination (at 9:20 AM).</li>
-                    <li>No electronic devices (mobiles, smart watches, etc.) are allowed in the examination hall.</li>
-                    <li>Candidates should not write anything on the admit card except for the required signatures.</li>
-                </ol>
-            </div>
-        </div>
     </div>
 
     <button id="downloadButton">Download as PDF</button>
@@ -258,10 +240,89 @@
             }
             
             // --- NEW, 100% RELIABLE PDF GENERATION LOGIC ---
+            function generatePdfHtml(data) {
+                let scheduleRows = '';
+                for (let i = 1; i <= 8; i++) {
+                    const dateKey = `DATE ${i}`;
+                    const paperKey = `PAPER ${i}`;
+                    if (data[dateKey] && data[paperKey]) {
+                        scheduleRows += `
+                            <tr>
+                                <td style="padding: 6px; font-size: 13px;">${data[dateKey]}</td>
+                                <td style="padding: 6px; font-size: 13px;">${data[paperKey]}</td>
+                                <td style="height: 30px; border: 1px solid #ccc;"></td>
+                                <td style="height: 30px; border: 1px solid #ccc;"></td>
+                            </tr>`;
+                    }
+                }
+
+                return `
+                    <!DOCTYPE html><html><head><style>
+                        body { font-family: sans-serif; box-sizing: border-box; }
+                        .pdf-page { padding: 15mm; width: 210mm; height: 297mm; box-sizing: border-box; }
+                        .pdf-header { text-align: center; border-bottom: 2px solid #0d47a1; padding-bottom: 10px; }
+                        .pdf-header h1 { margin: 0; color: #0d47a1; font-size: 24px; }
+                        .pdf-header p { margin: 4px 0; font-size: 14px; }
+                        .pdf-header h2 { margin: 10px 0 0 0; background: #1565c0; color: white; padding: 8px; font-size: 18px; }
+                        .pdf-student-info { display: flex; justify-content: space-between; margin-top: 15px; }
+                        .pdf-details-grid { display: flex; flex-wrap: wrap; width: 75%; }
+                        .pdf-detail-item { width: 50%; padding: 5px 0; font-size: 14px; }
+                        .pdf-photo-area { width: 25%; text-align: center; }
+                        .pdf-photo-box { width: 110px; height: 140px; border: 2px dashed #ccc; margin: 0 auto; text-align: center; font-size: 12px; padding: 5px; }
+                        .pdf-schedule { margin-top: 20px; }
+                        .pdf-schedule table { width: 100%; border-collapse: collapse; }
+                        .pdf-schedule th, .pdf-schedule td { border: 1px solid #ccc; padding: 6px; font-size: 12px; text-align: left; }
+                        .pdf-schedule th { background-color: #f5f7fa; }
+                        .pdf-footer { position: absolute; bottom: 20mm; left: 15mm; right: 15mm; display: flex; justify-content: space-between; padding-top: 15px; }
+                        .pdf-signature-area { font-size: 14px; text-align: center; border-top: 1px solid black; padding-top: 5px; width: 200px; }
+                        .pdf-pagebreak { page-break-before: always; }
+                        .pdf-instructions { padding: 18mm; }
+                        .pdf-instructions h3 { text-align: center; color: #0d47a1; }
+                        .pdf-instructions ol { line-height: 1.8; font-size: 14px; color: #c62828; }
+                    </style></head><body>
+                        <div class="pdf-page">
+                            <div class="pdf-header">
+                                <h1>MAHARISHI VIDYA MANDIR, NALBARI</h1>
+                                <p>CBSE CURRICULAM</p><p>Batiram Road, Nalbari, PIN-781335</p>
+                                <h2>ADMIT CARD - HALF YEARLY EXAMINATION 2025</h2>
+                            </div>
+                            <div class="pdf-student-info">
+                                <div class="pdf-details-grid">
+                                    <div class="pdf-detail-item"><b>Student ID:</b> ${data['STUDENT ID']}</div>
+                                    <div class="pdf-detail-item"><b>Class:</b> ${data['CLASS']}</div>
+                                    <div class="pdf-detail-item"><b>Student Name:</b> ${data["STUDENT'S NAME"]}</div>
+                                    <div class="pdf-detail-item"><b>Section:</b> ${data['SECTION']}</div>
+                                    <div class="pdf-detail-item"><b>Father's Name:</b> ${data["FATHER'S NAME"]}</div>
+                                    <div class="pdf-detail-item"><b>Roll No:</b> ${data['CLASS ROLL NO']}</div>
+                                </div>
+                                <div class="pdf-photo-area"><div class="pdf-photo-box">Paste recent passport size photograph here.</div></div>
+                            </div>
+                            <div class="pdf-schedule">
+                                <h3>Examination Schedule</h3>
+                                <table><thead><tr><th>Date</th><th>Subject / Paper</th><th>Student's Signature</th><th>Invigilator's Signature</th></tr></thead>
+                                <tbody>${scheduleRows}</tbody></table>
+                            </div>
+                            <div class="pdf-footer">
+                                <div class="pdf-signature-area">Student's Signature</div>
+                                <div class="pdf-signature-area">Principal's Signature</div>
+                            </div>
+                        </div>
+                        <div class="pdf-instructions pdf-pagebreak">
+                            <h3>Instructions for Candidates</h3>
+                            <ol>
+                                <li>Candidates must carry this Admit Card to the examination hall on all days.</li>
+                                <li>All candidates must report to the school before 8:45 AM. The school gate will be closed at 8:45 AM. No candidate will be permitted to enter the examination hall after this time under any circumstances.</li>
+                                <li>The examination will commence at 9:30 AM.</li>
+                                <li>Question papers will be distributed 10 minutes before the start of the examination (at 9:20 AM).</li>
+                                <li>No electronic devices (mobiles, smart watches, etc.) are allowed in the examination hall.</li>
+                                <li>Candidates should not write anything on the admit card except for the required signatures.</li>
+                            </ol>
+                        </div>
+                    </body></html>`;
+            }
+
             downloadButton.addEventListener('click', () => {
-                const admitCardElement = document.getElementById('admitCard');
-                const instructionsElement = document.getElementById('instructionsForPdf');
-                
+                const pdfHtml = generatePdfHtml(currentStudentData);
                 const studentID = currentStudentData['STUDENT ID'];
                 const studentName = currentStudentData["STUDENT'S NAME"];
                 
@@ -269,22 +330,12 @@
                     margin: 0,
                     filename: `AdmitCard_${studentName.replace(/\s+/g, '_')}_${studentID}.pdf`,
                     image: { type: 'jpeg', quality: 1.0 },
-                    html2canvas: { scale: 2, useCORS: true },
+                    html2canvas: { scale: 2 },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                // This new method generates the PDF in two separate, reliable steps.
-                const worker = html2pdf().from(admitCardElement).set(opt).toPdf();
-                
-                worker.get('pdf').then(function (pdf) {
-                    // Manually add a new page after the first one is rendered.
-                    pdf.addPage();
-                }).then(function () {
-                    // Render the instructions element onto the newly created page.
-                    return worker.from(instructionsElement).toContainer().toPdf();
-                }).save();
+                html2pdf().set(opt).from(pdfHtml).save();
             });
-        
         });
     </script>
 </body>
